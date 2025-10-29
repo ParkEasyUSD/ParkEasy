@@ -23,10 +23,33 @@ export function Login({ onNavigate, onLogin }: LoginProps) {
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleAuthError, setGoogleAuthError] = useState('');
 
+  // Registered Gmail users list
+  const registeredUsers = [
+    'john.doe@gmail.com',
+    'jane.smith@gmail.com',
+    'test.user@gmail.com',
+    'demo.user@gmail.com',
+    'parkeasy.demo@gmail.com'
+  ];
+
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const hasValidDomain = email.includes('.com') || email.includes('.org') || email.includes('.net') || email.includes('.edu') || email.includes('.gov');
     return emailRegex.test(email) && hasValidDomain;
+  };
+
+  const validateGmailRegistration = (email: string): boolean => {
+    // Check if email ends with @gmail.com
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      return false;
+    }
+    
+    // Check if email exists in registered users list
+    if (!registeredUsers.includes(email.toLowerCase())) {
+      return false;
+    }
+    
+    return true;
   };
 
   const validatePassword = (password: string): boolean => {
@@ -47,13 +70,14 @@ export function Login({ onNavigate, onLogin }: LoginProps) {
     }
   };
 
+  // On invalid user, render red error text and red border; do not navigate
   const handleSubmit = async () => {
     const newErrors: {[key: string]: string} = {};
 
     if (!formData.email) {
       newErrors.email = 'Email is required';
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address with proper domain (.com, .org, etc.)';
+    } else if (!validateGmailRegistration(formData.email)) {
+      newErrors.email = 'User not registered';
     }
 
     if (!formData.password) {
@@ -130,18 +154,20 @@ export function Login({ onNavigate, onLogin }: LoginProps) {
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="space-y-6">
             {/* Email Field */}
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`bg-gray-50 border-0 h-12 ${errors.email ? 'ring-2 ring-red-500' : ''}`}
-              />
+              <div className="mt-2">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className={`bg-gray-50 h-12 ${errors.email ? 'border-red-500 border-2' : 'border-0'}`}
+                />
+              </div>
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
+                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
               )}
             </div>
 

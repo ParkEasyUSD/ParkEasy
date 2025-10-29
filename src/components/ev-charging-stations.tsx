@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
+import { Input } from "./ui/input";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useState } from "react";
 
@@ -14,6 +15,36 @@ export function EVChargingStations({ onNavigate }: EVChargingStationsProps) {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Location dataset for validation
+  const validLocations = [
+    "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad",
+    "Jaipur", "Surat", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal",
+    "Downtown", "Midtown", "Tech Park", "Central Plaza", "Shopping District", "Mall Complex",
+    "Electric Ave", "Green Street", "Innovation Hub", "Metro Station", "Airport"
+  ];
+
+  // On invalid input/state, call window.alert(message) and abort the handler
+  const handleLocationSearch = () => {
+    if (!searchQuery.trim()) {
+      return;
+    }
+    
+    // Check if the search query matches any valid location
+    const isValidLocation = validLocations.some(location => 
+      location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      searchQuery.toLowerCase().includes(location.toLowerCase())
+    );
+    
+    if (!isValidLocation) {
+      window.alert('Invalid location entered. Please check and try again.');
+      return;
+    }
+    
+    // Proceed with search if valid
+    console.log('Searching for charging stations in:', searchQuery);
+  };
 
   const chargingStations = [
     {
@@ -208,6 +239,42 @@ export function EVChargingStations({ onNavigate }: EVChargingStationsProps) {
             >
               <Filter className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+
+        {/* Location Search Bar */}
+        <div className="relative mb-4">
+          <div className="flex space-x-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search by location, area..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLocationSearch();
+                  }
+                }}
+                className="bg-white text-black pl-10 pr-4"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+            <Button
+              onClick={handleLocationSearch}
+              className="bg-white text-[#1B1F73] hover:bg-white/90"
+              size="sm"
+            >
+              Search
+            </Button>
           </div>
         </div>
 

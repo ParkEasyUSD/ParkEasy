@@ -4,12 +4,16 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Input } from "./ui/input";
+import { useState } from "react";
 
 interface ParkingHistoryProps {
   onNavigate: (screen: string) => void;
 }
 
 export function ParkingHistory({ onNavigate }: ParkingHistoryProps) {
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const historyData = [
     {
       id: "PK2459",
@@ -78,6 +82,39 @@ export function ParkingHistory({ onNavigate }: ParkingHistoryProps) {
     totalSpent: 245.50,
     avgDuration: "3.2 hours",
     favLocation: "Downtown Plaza"
+  };
+
+  // On invalid input/state, call window.alert(message) and abort the handler
+  const handleRunAnalytics = () => {
+    if (!startDate || !endDate) {
+      window.alert('Invalid date entered. Please select a valid date range.');
+      return;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const today = new Date();
+
+    // Check if dates are valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      window.alert('Invalid date entered. Please select a valid date range.');
+      return;
+    }
+
+    // Check if start date is after end date
+    if (start > end) {
+      window.alert('Invalid date entered. Please select a valid date range.');
+      return;
+    }
+
+    // Check if dates are in the future (out of bounds)
+    if (start > today || end > today) {
+      window.alert('Invalid date entered. Please select a valid date range.');
+      return;
+    }
+
+    // Proceed with analytics if valid
+    console.log('Running analytics from', startDate, 'to', endDate);
   };
 
   const getStatusColor = (status: string) => {
@@ -187,6 +224,40 @@ export function ParkingHistory({ onNavigate }: ParkingHistoryProps) {
           </TabsContent>
           
           <TabsContent value="analytics" className="space-y-4 mt-4">
+            {/* Date Range Selector */}
+            <Card className="p-4">
+              <h3 className="font-medium mb-4">Select Date Range</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Start Date</label>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">End Date</label>
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    className="w-full"
+                  />
+                </div>
+                <Button 
+                  onClick={handleRunAnalytics}
+                  className="w-full bg-[#1B1F73] hover:bg-[#1B1F73]/90"
+                >
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Run Analytics
+                </Button>
+              </div>
+            </Card>
+
             {/* Monthly Overview */}
             <Card className="p-4">
               <h3 className="font-medium mb-4">September 2025 Overview</h3>

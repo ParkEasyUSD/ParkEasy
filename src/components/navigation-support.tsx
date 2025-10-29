@@ -38,7 +38,27 @@ export function NavigationSupport({ onNavigate }: NavigationSupportProps) {
     { type: "accident", message: "Accident cleared - route updated", severity: "low" }
   ];
 
+  // On invalid input/state, call window.alert(message) and abort the handler
+  const checkGPSAvailability = (): boolean => {
+    // Simulate GPS check - in a real app, this would check navigator.geolocation
+    if (!navigator.geolocation) {
+      return false;
+    }
+    
+    // Simulate various GPS scenarios (you can modify this for testing)
+    // For demo purposes, we'll randomly simulate GPS issues 20% of the time
+    const gpsAvailable = Math.random() > 0.2;
+    
+    return gpsAvailable;
+  };
+
   const startNavigation = () => {
+    // Check GPS availability first
+    if (!checkGPSAvailability()) {
+      window.alert('Location unavailable. Please enable GPS or check your network connection.');
+      return;
+    }
+
     setIsNavigating(true);
     setCurrentInstruction(0);
     // Simulate navigation progress
@@ -51,6 +71,15 @@ export function NavigationSupport({ onNavigate }: NavigationSupportProps) {
         return prev + 1;
       });
     }, 5000);
+  };
+
+  const retryGPS = () => {
+    if (!checkGPSAvailability()) {
+      window.alert('Location unavailable. Please enable GPS or check your network connection.');
+    } else {
+      // GPS is now available, attempt to start navigation
+      startNavigation();
+    }
   };
 
   const getInstructionIcon = (type: string) => {
@@ -238,13 +267,23 @@ export function NavigationSupport({ onNavigate }: NavigationSupportProps) {
       <div className="p-4 space-y-4">
         {/* Start Navigation Button */}
         {!isNavigating && (
-          <Button 
-            onClick={startNavigation}
-            className="w-full bg-[#1B1F73] hover:bg-[#1B1F73]/90 h-12"
-          >
-            <Navigation className="w-5 h-5 mr-2" />
-            Start AI Navigation
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              onClick={startNavigation}
+              className="w-full bg-[#1B1F73] hover:bg-[#1B1F73]/90 h-12"
+            >
+              <Navigation className="w-5 h-5 mr-2" />
+              Start AI Navigation
+            </Button>
+            <Button 
+              onClick={retryGPS}
+              variant="outline"
+              className="w-full h-10"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Retry GPS
+            </Button>
+          </div>
         )}
 
         {/* Navigation Controls */}

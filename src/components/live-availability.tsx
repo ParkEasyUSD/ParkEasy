@@ -187,6 +187,26 @@ export function LiveAvailability({ onNavigate }: LiveAvailabilityProps) {
     setShowSuggestions(false);
   };
 
+  // On invalid input, call window.alert(message) and abort the handler
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      return;
+    }
+    
+    // Check if the search query matches any location in the dataset
+    const isValidLocation = locationDataset.some(location => 
+      location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    if (!isValidLocation) {
+      window.alert('Invalid location entered. Please check and try again.');
+      return;
+    }
+    
+    // Proceed with search if valid
+    setShowSuggestions(false);
+  };
+
   const resetFilters = () => {
     setMaxDistance([5]);
     setMaxPrice([100]);
@@ -233,7 +253,12 @@ export function LiveAvailability({ onNavigate }: LiveAvailabilityProps) {
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                className="bg-white text-black pl-10 pr-4"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                className="bg-white text-black pl-10 pr-10"
               />
               {searchQuery && (
                 <button
@@ -247,6 +272,13 @@ export function LiveAvailability({ onNavigate }: LiveAvailabilityProps) {
                 </button>
               )}
             </div>
+            <Button
+              onClick={handleSearch}
+              className="bg-white text-[#1B1F73] hover:bg-white/90"
+              size="sm"
+            >
+              Search
+            </Button>
           </div>
           
           {/* Smart Suggestions Dropdown */}
